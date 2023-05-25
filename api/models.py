@@ -1,43 +1,159 @@
-# from django.db import models
-# from django.contrib.auth.models import AbstractUser
-# from django.core.validators import RegexValidator
-# from django.core.validators import FileExtensionValidator
-# from django.core.exceptions import ValidationError
-# from django.utils.translation import gettext_lazy as _
+from django.db import models
+from django.core.validators import  MaxValueValidator, MinValueValidator
 
-# from django.conf import settings
+from customauth.models import User
 
-# # Create your models here.
+from datetime import datetime,timedelta,date
 
-# class User(AbstractUser):
+class Category(models.Model):
+    name=models.CharField(max_length=50)
+    created_at=models.DateTimeField(auto_now_add=True)
+    updated_at=models.DateTimeField(auto_now=True)
     
-#     email = models.EmailField(_("email address"), blank=False,unique=True)
+    def __str__(self):
+        return self.name
     
-#     phone=models.CharField(max_length=11,
-#         validators=[RegexValidator(r'^01[0125][0-9]{8}$')])
 
-#     # need to confirm email 
-#     is_active = models.BooleanField(
-#         _("active"),
-#         default=False,
-#         help_text=_(
-#             "Designates whether this user should be treated as active. "
-#             "Unselect this instead of deleting accounts."
-#         ),
-#     )
+class Tag(models.Model):
+    name=models.CharField(max_length=50)
+    created_at=models.DateTimeField(auto_now_add=True)
+    updated_at=models.DateTimeField(auto_now=True)
+    def __str__(self):
+        return self.name
+    
+def default_end_date():
+    return (date.today() + timedelta(days=5)).isoformat()
 
-#     REQUIRED_FIELDS = ['first_name','last_name','email',"picture","phone"]
+class Project(models.Model):
+    user=models.ForeignKey(User,on_delete=models.CASCADE)
+    title=models.CharField(max_length=50)
+    category=models.ForeignKey(Category,on_delete=models.CASCADE)
+    details=models.TextField()
+    target_donations=models.IntegerField(default=0,validators=[MinValueValidator(0)])
+    current_donations=models.IntegerField(default=0)
+    tags=models.ManyToManyField(Tag)
+    average_rating=models.FloatField(default=0)
+    is_available=models.BooleanField(default=True)
+    start_date=models.DateField(default=date.today)
+    end_date=models.DateField(default=date.today)
+    created_at=models.DateTimeField(auto_now_add=True)
+    updated_at=models.DateTimeField(auto_now=True)
     
-#     # validate image fun
-#     def validate_image(fieldfile_obj):
-#         filesize = fieldfile_obj.file.size
-#         megabyte_limit = 1.0
-#         if filesize > megabyte_limit*1024*1024:
-#             raise ValidationError("Max file size is %sMB" % str(megabyte_limit))
+    def __str__(self):
+        return self.title
     
-#     # image field
-#     picture=models.ImageField(upload_to="picture/",
-#             max_length=1024*1024,
-#             validators=[validate_image,
-#             FileExtensionValidator(allowed_extensions=settings.ALLOWED_IMAGE_EXTENSIONS)
-#             ])
+    
+
+class Image(models.Model):
+    url=models.ImageField(upload_to="picture/",blank=True,default="./default/user.png")
+    project=models.ForeignKey(Project,on_delete=models.CASCADE)
+    created_at=models.DateTimeField(auto_now_add=True)
+    updated_at=models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return self.project.title
+    
+class Donation(models.Model):
+    user=models.ForeignKey(User,on_delete=models.CASCADE)
+    project=models.ForeignKey(Project,on_delete=models.CASCADE)
+    amount=models.IntegerField(
+        default=0,
+        validators=[
+            # MaxValueValidator(Project.objects.get(id=project).target),
+            MinValueValidator(0)
+        ])
+    created_at=models.DateTimeField(auto_now_add=True)
+    updated_at=models.DateTimeField(auto_now=True)
+    def __str__(self):
+        return str(self.amount)
+    
+    def save(self,*args, **kwargs):
+        '''
+        re calculate current_donations of project when adding new donation 
+        '''
+        project=Project.objects.get(id=self.project.id)
+        money_to_complete_the_target= (project.target_donations-project.current_donations)
+        if self.amount> money_to_complete_the_target:
+            self.amount=money_to_complete_the_target
+        project.current_donations+=self.amount
+            
+        super().save(*args, **kwargs) 
+        project.save()
+        # ratings=list(project.ratings.values_list('rate',flat=True))
+        # avg_rate=((sum(ratings)+self.rate)/(len(ratings)+1))
+        # project.average_rating=avg_rate
+    
+class Comment(models.Model):
+    user=models.ForeignKey(User,on_delete=models.CASCADE)
+    project=models.ForeignKey(Project,on_delete=models.CASCADE)
+    comment_message=models.CharField(max_length=60)
+    is_available=models.BooleanField(default=True)
+    created_at=models.DateTimeField(auto_now_add=True)
+    updated_at=models.DateTimeField(auto_now=True)
+    
+    
+    def __str__(self):
+        return self.comment_message
+    
+class Report(models.Model):
+    user=models.ForeignKey(User,on_delete=models.CASCADE)
+    project=models.ForeignKey(Project,on_delete=models.CASCADE,blank=True,null=True)
+    comment=models.ForeignKey(Comment,on_delete=models.CASCADE,blank=True,null=True)
+    report_message=models.CharField(max_length=60)
+    is_accepted=models.BooleanField(default=False)
+    created_at=models.DateTimeField(auto_now_add=True)
+    updated_at=models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return self.report_message
+
+
+    def save(self,*args, **kwargs):
+        '''
+        set
+            project.is_available to false
+        OR 
+            comment.is_available to false
+        
+        if report accepted 
+        '''
+        if self.is_accepted:
+            if self.project:    
+                project=Project.objects.get(id=self.project.id)
+                project.is_available=False
+                project.save()
+            else:
+                comment=Comment.objects.get(id=self.comment.id)
+                comment.is_available=False
+                comment.save()   
+                
+        super().save(*args, **kwargs)    
+
+class Rate(models.Model):
+    user=models.ForeignKey(User,on_delete=models.CASCADE)
+    project=models.ForeignKey(Project,on_delete=models.CASCADE,related_name='ratings')
+    rate=models.IntegerField(
+        default=0,
+        validators=[
+            MaxValueValidator(5),
+            MinValueValidator(0)
+        ])
+    created_at=models.DateTimeField(auto_now_add=True)
+    updated_at=models.DateTimeField(auto_now=True)
+    def __str__(self):
+        return str(self.rate)
+    
+    def save(self,*args, **kwargs):
+        '''
+        calculate avg rating of project when adding new rating 
+        '''
+        project=Project.objects.get(id=self.project.id)
+        ratings=list(project.ratings.values_list('rate',flat=True))
+        avg_rate=((sum(ratings)+self.rate)/(len(ratings)+1))
+        project.average_rating=avg_rate
+        super().save(*args, **kwargs) 
+        project.save()
+        
+        
+
+

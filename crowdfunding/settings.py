@@ -42,8 +42,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     
     # my apps
-    'customauth',
-    'api',
+    'customauth.apps.CustomauthConfig',
+    'api.apps.ApiConfig',
     'rest_framework',
     'rest_framework.authtoken',
 ]
