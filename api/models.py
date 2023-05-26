@@ -34,6 +34,7 @@ class Project(models.Model):
     tags=models.ManyToManyField(Tag)
     average_rating=models.FloatField(default=0)
     is_available=models.BooleanField(default=True)
+    is_featured=models.BooleanField(default=False)
     start_date=models.DateField(default=date.today)
     end_date=models.DateField(default=date.today)
     created_at=models.DateTimeField(auto_now_add=True)
@@ -42,11 +43,15 @@ class Project(models.Model):
     def __str__(self):
         return self.title
     
+# class FeaturedProjects(models.Model):
+#     project=models.ManyToManyField(Project)
     
+#     def __str__(self):
+#         return 'Featured Projects'
 
 class Image(models.Model):
     url=models.ImageField(upload_to="picture/",blank=True,default="./default/user.png")
-    project=models.ForeignKey(Project,on_delete=models.CASCADE)
+    project=models.ForeignKey(Project,on_delete=models.CASCADE,related_name='images')
     created_at=models.DateTimeField(auto_now_add=True)
     updated_at=models.DateTimeField(auto_now=True)
     
@@ -54,8 +59,8 @@ class Image(models.Model):
         return self.project.title
     
 class Donation(models.Model):
-    user=models.ForeignKey(User,on_delete=models.CASCADE)
-    project=models.ForeignKey(Project,on_delete=models.CASCADE)
+    user=models.ForeignKey(User,on_delete=models.CASCADE,related_name='donations')
+    project=models.ForeignKey(Project,on_delete=models.CASCADE,related_name='donations')
     amount=models.IntegerField(
         default=0,
         validators=[
@@ -85,7 +90,7 @@ class Donation(models.Model):
     
 class Comment(models.Model):
     user=models.ForeignKey(User,on_delete=models.CASCADE)
-    project=models.ForeignKey(Project,on_delete=models.CASCADE)
+    project=models.ForeignKey(Project,on_delete=models.CASCADE,related_name='comments')
     comment_message=models.CharField(max_length=60)
     is_available=models.BooleanField(default=True)
     created_at=models.DateTimeField(auto_now_add=True)

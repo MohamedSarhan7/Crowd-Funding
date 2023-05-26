@@ -11,7 +11,7 @@ class comment_admin(admin.ModelAdmin):
     search_fields = ['user__username','user__first_name','project__title']
 
 class project_admin(admin.ModelAdmin):
-    list_display = ('title','user','category','is_available')
+    list_display = ('title','user','category','average_rating','is_available','is_featured')
     list_filter = ('category','tags',"user")
     search_fields = ['user__username','user__first_name','title']
     
