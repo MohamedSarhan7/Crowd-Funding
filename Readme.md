@@ -6,11 +6,42 @@ Crowdfunding is a form of crowdsourcing and alternative finance.
 
 ## Run Locally
 
+<hr>
+
 Clone the project
 
 ```bash
   git clone git@github.com:MohamedSarhan7/Crowd-Funding.git
 ```
+<hr>
+
+### create virtual environment 
+
+### windows 
+* create 
+```bash
+  python -m venv env
+```
+* activate
+```bash
+  env\Scripts\activate
+```
+
+### ubuntu 
+* install venv 
+```bash
+sudo apt-get install python3-venv
+
+```
+* create 
+```bash
+python3 -m venv env
+```
+* activate
+```bash
+  source env/bin/activate
+```
+<hr>
 
 Go to the project directory
 
@@ -30,7 +61,7 @@ create .env file
 > **please don't forget to fill the env variables**
 
 ```bash
-  cp .env-example .env
+  cp .env.example .env
 ```
 
 make migrations
