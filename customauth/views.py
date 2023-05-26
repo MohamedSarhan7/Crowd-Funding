@@ -8,14 +8,17 @@ from rest_framework.authtoken.models import Token
 from .models import User
 from .serializers import RegisterSerializer,LoginSerializer,UserSerializer
 
+import os
+from dotenv import load_dotenv
 
+load_dotenv()
 @api_view([ 'POST'])
 def register(request):
     serializer = RegisterSerializer(data=request.data)
     if serializer.is_valid():
         user=serializer.save()
         user.email_user("subject",f"""hola from DRF
-                        your email code is: {user.genrate_verification_code()}""")
+                        your email code is: {os.getenv('FRONT_END_URL')}/verifiy-email/{user.email}/{user.genrate_verification_code()}""")
         
         return Response(
             {
@@ -58,7 +61,9 @@ def verifiy_email(request,email,code):
         return Response({"message":"there is no user created by this email"}, status=status.HTTP_400_BAD_REQUEST)
     
     if user.verifiy_email(code):
-        return Response({"message":"email verified successfully"},status=status.HTTP_200_OK)
+        token = Token.objects.create(user=user)
+        serializer=UserSerializer(user)
+        return Response({"user":serializer.data,"token":token.key,"message":"email verified successfully"},status=status.HTTP_200_OK)
     
     return Response({"message":"code not valid "}, status=status.HTTP_400_BAD_REQUEST)
     
