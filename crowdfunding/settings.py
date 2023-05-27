@@ -46,6 +46,9 @@ INSTALLED_APPS = [
     'api.apps.ApiConfig',
     'rest_framework',
     'rest_framework.authtoken',
+    # cors headders
+    
+    "corsheaders",
 ]
 
 MIDDLEWARE = [
@@ -157,3 +160,6 @@ EMAIL_HOST = os.getenv('EMAIL_HOST')
 EMAIL_PORT =os.getenv('EMAIL_PORT')
 EMAIL_HOST_USER =os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+
+# CORS Headers
+CORS_ALLOW_ALL_ORIGINS = True
