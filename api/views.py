@@ -1,4 +1,7 @@
 # from rest_framework.decorators import api_view,authentication_classes,permission_classes
+from django.http import Http404
+from django.shortcuts import get_object_or_404
+from rest_framework.exceptions import NotFound,APIException
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticatedOrReadOnly,IsAuthenticated,IsAdminUser
 from rest_framework.authentication import TokenAuthentication
@@ -77,3 +80,63 @@ class Search(APIView):
                     "search":serializer_search.data,
                     }
                 )
+        
+        
+        
+class CategoryList(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    
+    def get(self,request):
+        #  get all categories for create project form         
+        categories=Category.objects.all()
+        serializer_categories=CategorySerializer(categories,many=True)
+            
+        return Response(
+                {
+                    "categories":serializer_categories.data,
+                    }
+                )
+        
+class TagList(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    
+    def get(self,request):
+        #  get all tags for create project form         
+        tags=Tag.objects.all()
+        serializer_tags=TagSerializer(tags,many=True)
+            
+        return Response(
+                {
+                    "tags":serializer_tags.data,
+                    }
+                )
+
+class ProjectList(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    def post(self,request):
+        
+        # set user in request data from token 
+        request.data['user']=request.user.id
+        # creation serializer
+        serializer = ProjectSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        project=serializer.save()
+        # view serializer
+        project=HomeSerializer(project)
+        return Response(project.data,status=status.HTTP_201_CREATED)
+    
+class ProjectDetail(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    def get(self,request,id):
+        try:
+            project=get_object_or_404(Project,id=id)
+            project=HomeSerializer(project)
+            return Response(project.data,status=status.HTTP_201_CREATED)
+        except Http404:
+            return Response({'message':'project not found'},status=status.HTTP_404_NOT_FOUND)
+
+    

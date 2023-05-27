@@ -25,8 +25,17 @@ class image_admin(admin.ModelAdmin):
     list_filter = ('project__title','project__tags')
     
 class donation_admin(admin.ModelAdmin):
-    list_display = ('amount','project',"user")
+    list_display = ('project',"user",'amount','project__current_donations','project__target_donations')
     list_filter = ('project__title','project__tags')
+    
+    def project__target_donations(self, obj):
+        return obj.project.target_donations
+    
+    def project__current_donations(self, obj):
+        return obj.project.current_donations
+    
+    project__target_donations.short_description = 'Target'
+    project__current_donations.short_description = 'Current'
 
 class rate_admin(admin.ModelAdmin):
     list_display = ('project','rate',"user")
