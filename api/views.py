@@ -7,6 +7,7 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly,IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.pagination import PageNumberPagination
 
 from django.db.models import Q
 
@@ -116,6 +117,16 @@ class TagList(APIView):
 class ProjectList(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
+    pagination_class = PageNumberPagination
+
+    def get(self, request):
+        projects = Project.objects.filter(is_available=True)
+        print(list(projects))
+        paginator = self.pagination_class()
+        result_page = paginator.paginate_queryset(queryset=projects, request=request)
+        serializer = HomeSerializer(result_page, many=True)
+        return paginator.get_paginated_response(serializer.data)
+
     def post(self,request):
         
         # set user in request data from token 
