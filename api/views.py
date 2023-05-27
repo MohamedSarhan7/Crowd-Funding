@@ -142,11 +142,17 @@ class ProjectList(APIView):
 class ProjectDetail(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
+    
     def get(self,request,id):
         try:
             project=get_object_or_404(Project,id=id)
-            project=HomeSerializer(project)
-            return Response(project.data,status=status.HTTP_201_CREATED)
+            serializer_project=HomeSerializer(project)
+            
+            # get 4 similar projects based in project tag
+            similar_projects = Project.objects.filter(tags__in=project.tags.all()).exclude(id=project.id).distinct()[:4]
+            serializer_similar_projects=HomeSerializer(similar_projects,many=True)
+            
+            return Response({"project":serializer_project.data,"similar_projects":serializer_similar_projects.data},status=status.HTTP_201_CREATED)
         except Http404:
             return Response({'message':'project not found'},status=status.HTTP_404_NOT_FOUND)
 
