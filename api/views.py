@@ -155,5 +155,26 @@ class ProjectDetail(APIView):
             return Response({"project":serializer_project.data,"similar_projects":serializer_similar_projects.data},status=status.HTTP_201_CREATED)
         except Http404:
             return Response({'message':'project not found'},status=status.HTTP_404_NOT_FOUND)
-
     
+    def put(self,requst,id):
+        """
+        Project creator can cancel the project if the donations are less than
+        25% of the target
+        """
+        try:
+            project=get_object_or_404(Project,id=id)
+            if requst.user.id != project.user.id:
+                return Response({'message':"you didn't create this project"},status=status.HTTP_400_BAD_REQUEST)
+            
+            if not project.is_available:
+                return Response({'message':"project already canceled or reported"},status=status.HTTP_400_BAD_REQUEST)
+                    
+            parcent=(project.current_donations/project.target_donations)*100
+            if parcent < 25:
+                project.is_available=False
+                project.save()
+                serializer_project=HomeSerializer(project)  
+                return Response({"project":serializer_project.data},status=status.HTTP_200_OK)
+            return Response({'message':"project donations has more than 25% of the target donations "},status=status.HTTP_400_BAD_REQUEST)
+        except Http404:
+            return Response({'message':'project not found'},status=status.HTTP_404_NOT_FOUND)

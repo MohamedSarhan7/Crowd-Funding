@@ -53,6 +53,7 @@ class HomeSerializer(serializers.ModelSerializer):
             'id','title','user','details',
             'target_donations','current_donations','average_rating',
             'start_date','end_date','category',
+            'is_featured','is_available',
             'tags','images','donations','comments'
             ,'created_at','updated_at',
             # ''
