@@ -24,6 +24,17 @@ class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model=Category
         fields = '__all__'
+
+class CommentSerializer(serializers.ModelSerializer):
+    project = serializers.StringRelatedField()
+    user = serializers.StringRelatedField()
+    created_at = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S")
+    updated_at = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S")
+    class Meta:
+        model=Comment
+        fields = '__all__'
+
+        
                 
 class HomeSerializer(serializers.ModelSerializer):
     user = serializers.StringRelatedField()
@@ -31,6 +42,7 @@ class HomeSerializer(serializers.ModelSerializer):
     donations = DonationsSerializer(many=True)
     tags = serializers.StringRelatedField(many=True)
     images = ImageSerializer(many=True)
+    comments=CommentSerializer(many=True)
     created_at = serializers.DateTimeField(read_only=True,format="%d-%m-%Y %H:%M:%S")
     updated_at = serializers.DateTimeField(read_only=True,format="%d-%m-%Y %H:%M:%S")
     
@@ -41,19 +53,13 @@ class HomeSerializer(serializers.ModelSerializer):
             'id','title','user','details',
             'target_donations','current_donations','average_rating',
             'start_date','end_date','category',
-            'tags','images','donations'
+            'tags','images','donations','comments'
             ,'created_at','updated_at',
             # ''
             )
 
 
-class CategorySerializer(serializers.ModelSerializer):
-    created_at = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S")
-    updated_at = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S")
-    class Meta:
-        model=Category
-        fields = '__all__'
-        
+
 class TagSerializer(serializers.ModelSerializer):
     created_at = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S")
     updated_at = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S")
