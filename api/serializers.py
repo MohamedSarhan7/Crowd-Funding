@@ -89,7 +89,14 @@ class HomeSerializer(serializers.ModelSerializer):
             # ''
             )
 
-
+class ReportSerializer(serializers.ModelSerializer):
+    created_at = serializers.DateTimeField(read_only=True,format="%d-%m-%Y %H:%M:%S")
+    updated_at = serializers.DateTimeField(read_only=True,format="%d-%m-%Y %H:%M:%S")
+    is_accepted=serializers.BooleanField(read_only=True)
+    class Meta:
+        model=Report
+        fields = '__all__'
+        
 
 class TagSerializer(serializers.ModelSerializer):
     created_at = serializers.DateTimeField(read_only=True,format="%d-%m-%Y %H:%M:%S")

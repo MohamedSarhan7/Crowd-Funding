@@ -262,3 +262,28 @@ class RateDetails(APIView):
         except Http404:
             return Response({'message':'rate not found'},status=status.HTTP_404_NOT_FOUND)
         
+class ReportList(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def post(self,request):
+        # set user in request data from token 
+    
+        data = request.data.copy()
+        data['user'] = request.user.id
+        comment=data.get('comment',None) 
+        project=data.get('project',None)
+        
+        if  project is None and comment is None:
+            return Response(
+                {
+                    "message":"you must provide a comment or project for this report"
+                    },
+                status=status.HTTP_400_BAD_REQUEST)
+        
+        serializer = ReportSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data,status=status.HTTP_201_CREATED)
+        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+

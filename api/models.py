@@ -122,14 +122,14 @@ class Report(models.Model):
         OR 
             comment.is_available to false
         
-        if report accepted 
+        |*** if report accepted ***| 
         '''
         if self.is_accepted:
             if self.project:    
                 project=Project.objects.get(id=self.project.id)
                 project.is_available=False
                 project.save()
-            else:
+            elif self.comment:
                 comment=Comment.objects.get(id=self.comment.id)
                 comment.is_available=False
                 comment.save()   
