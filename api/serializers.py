@@ -2,39 +2,69 @@ from rest_framework import serializers
 from .models import *
 
 class ImageSerializer(serializers.ModelSerializer):
-    created_at = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S")
-    updated_at = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S")
+    created_at = serializers.DateTimeField(read_only=True,format="%d-%m-%Y %H:%M:%S")
+    updated_at = serializers.DateTimeField(read_only=True,format="%d-%m-%Y %H:%M:%S")
     project = serializers.StringRelatedField()
     class Meta:
         model=Image
         fields = '__all__'  
 
 class DonationsSerializer(serializers.ModelSerializer):
-    created_at = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S")
-    updated_at = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S")
+    created_at = serializers.DateTimeField(read_only=True,format="%d-%m-%Y %H:%M:%S")
+    updated_at = serializers.DateTimeField(read_only=True,format="%d-%m-%Y %H:%M:%S")
     project = serializers.StringRelatedField()
     user = serializers.StringRelatedField()
     class Meta:
         model=Donation
         fields = '__all__'  
 
+class CreateDonationsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=Donation
+        fields = '__all__' 
+
+
+class RateSerializer(serializers.ModelSerializer):
+    created_at = serializers.DateTimeField(read_only=True,format="%d-%m-%Y %H:%M:%S")
+    updated_at = serializers.DateTimeField(read_only=True,format="%d-%m-%Y %H:%M:%S")
+    class Meta:
+        model=Rate
+        fields = '__all__'
+        
+    def update(self, instance, validated_data):
+        instance.rate = validated_data.get('rate', instance.rate)
+        print(instance.rate)
+        instance.save()
+        return instance
+        
 class CategorySerializer(serializers.ModelSerializer):
-    created_at = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S")
-    updated_at = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S")
+    created_at = serializers.DateTimeField(read_only=True,format="%d-%m-%Y %H:%M:%S")
+    updated_at = serializers.DateTimeField(read_only=True,format="%d-%m-%Y %H:%M:%S")
     class Meta:
         model=Category
         fields = '__all__'
 
 class CommentSerializer(serializers.ModelSerializer):
-    project = serializers.StringRelatedField()
+    project = serializers.StringRelatedField(read_only=True)
     user = serializers.StringRelatedField()
-    created_at = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S")
-    updated_at = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S")
+    created_at = serializers.DateTimeField(read_only=True,format="%d-%m-%Y %H:%M:%S")
+    updated_at = serializers.DateTimeField(read_only=True,format="%d-%m-%Y %H:%M:%S")
     class Meta:
         model=Comment
         fields = '__all__'
 
-        
+class CreateCommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=Comment
+        fields = '__all__'   
+    def create(self, validated_data):
+        # Remove the unwanted properties from the validated data
+        validated_data.pop('is_available', None)
+        # create comment
+        instance = Comment.objects.create(**validated_data)
+
+        return instance
+    
                 
 class HomeSerializer(serializers.ModelSerializer):
     user = serializers.StringRelatedField()
@@ -62,8 +92,8 @@ class HomeSerializer(serializers.ModelSerializer):
 
 
 class TagSerializer(serializers.ModelSerializer):
-    created_at = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S")
-    updated_at = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S")
+    created_at = serializers.DateTimeField(read_only=True,format="%d-%m-%Y %H:%M:%S")
+    updated_at = serializers.DateTimeField(read_only=True,format="%d-%m-%Y %H:%M:%S")
     class Meta:
         model=Tag
         fields = '__all__'

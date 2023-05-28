@@ -42,12 +42,14 @@ class Project(models.Model):
     
     def __str__(self):
         return self.title
-    
-# class FeaturedProjects(models.Model):
-#     project=models.ManyToManyField(Project)
-    
-#     def __str__(self):
-#         return 'Featured Projects'
+    #  called in rate save method
+    def calculate_avg_rate(self):
+        ratings=list(self.ratings.values_list('rate',flat=True))
+        avg_rate=(sum(ratings)/len(ratings))
+        self.average_rating=avg_rate
+        self.save()
+        
+
 
 class Image(models.Model):
     url=models.ImageField(upload_to="picture/",blank=True,default="./default/user.png")
@@ -137,7 +139,7 @@ class Report(models.Model):
 class Rate(models.Model):
     user=models.ForeignKey(User,on_delete=models.CASCADE)
     project=models.ForeignKey(Project,on_delete=models.CASCADE,related_name='ratings')
-    rate=models.IntegerField(
+    rate=models.FloatField(
         default=0,
         validators=[
             MaxValueValidator(5),
@@ -152,16 +154,29 @@ class Rate(models.Model):
     def __str__(self):
         return str(self.rate)
     
-    def save(self,*args, **kwargs):
-        '''
-        calculate avg rating of project when adding new rating 
-        '''
-        project=Project.objects.get(id=self.project.id)
-        ratings=list(project.ratings.values_list('rate',flat=True))
-        avg_rate=((sum(ratings)+self.rate)/(len(ratings)+1))
-        project.average_rating=avg_rate
+    
+    def save(self, *args, **kwargs):
         super().save(*args, **kwargs) 
-        project.save()
+        self.project.calculate_avg_rate()
+
+    # def save(self,*args, **kwargs):
+    #     rate=Rate.objects.get(user=self.user,project=self.project)
+    #     avg_rate=0
+    #     if rate is None:
+    #         project=Project.objects.get(id=self.project.id)
+    #         avg_rate=((sum(ratings)+self.rate)/(len(ratings)+1))
+    #     else:
+    #         rate.rate=self.rate
+    #         rate.save()
+    #         project=Project.objects.get(id=self.project.id)
+    #         ratings=list(project.ratings.values_list('rate',flat=True))
+            
+    #     '''
+    #     calculate avg rating of project when adding new rating 
+    #     '''
+    #     project.average_rating=avg_rate
+    #     super().save(*args, **kwargs) 
+    #     project.save()
         
         
 

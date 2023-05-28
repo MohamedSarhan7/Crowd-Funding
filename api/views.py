@@ -130,9 +130,11 @@ class ProjectList(APIView):
     def post(self,request):
         
         # set user in request data from token 
-        request.data['user']=request.user.id
+        # request.data['user']=request.user.id
+        data = request.data.copy()
+        data['user'] = request.user.id
         # creation serializer
-        serializer = ProjectSerializer(data=request.data)
+        serializer = ProjectSerializer(data=data)
         serializer.is_valid(raise_exception=True)
         project=serializer.save()
         # view serializer
@@ -152,18 +154,18 @@ class ProjectDetail(APIView):
             similar_projects = Project.objects.filter(tags__in=project.tags.all()).exclude(id=project.id).distinct()[:4]
             serializer_similar_projects=HomeSerializer(similar_projects,many=True)
             
-            return Response({"project":serializer_project.data,"similar_projects":serializer_similar_projects.data},status=status.HTTP_201_CREATED)
+            return Response({"project":serializer_project.data,"similar_projects":serializer_similar_projects.data},status=status.HTTP_200_OK)
         except Http404:
             return Response({'message':'project not found'},status=status.HTTP_404_NOT_FOUND)
     
-    def put(self,requst,id):
+    def put(self,request,id):
         """
         Project creator can cancel the project if the donations are less than
         25% of the target
         """
         try:
             project=get_object_or_404(Project,id=id)
-            if requst.user.id != project.user.id:
+            if request.user.id != project.user.id:
                 return Response({'message':"you didn't create this project"},status=status.HTTP_400_BAD_REQUEST)
             
             if not project.is_available:
@@ -178,3 +180,85 @@ class ProjectDetail(APIView):
             return Response({'message':"project donations has more than 25% of the target donations "},status=status.HTTP_400_BAD_REQUEST)
         except Http404:
             return Response({'message':'project not found'},status=status.HTTP_404_NOT_FOUND)
+
+
+
+class CommentList(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def post(self,request):
+        # set user in request data from token 
+        # request.data['user']=request.user.id
+        data = request.data.copy()
+        data['user'] = request.user.id
+        # create comment serializer
+        serializer = CreateCommentSerializer(data=data)
+        if serializer.is_valid():
+            comment=serializer.save()
+            #  retrive comment serializer
+            serializer=CommentSerializer(comment)
+            return Response(serializer.data,status=status.HTTP_201_CREATED)
+        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+        
+        
+class DonationtList(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def post(self,request):
+        # set user in request data from token 
+        # request.data['user']=request.user.id
+        if int(request.data['amount'])<=0:
+            return Response({"message":"amount shoud be greater than zero!"},status=status.HTTP_400_BAD_REQUEST)
+            
+        data = request.data.copy()
+        data['user'] = request.user.id
+        # create donation serializer
+        serializer = CreateDonationsSerializer(data=data)
+        if serializer.is_valid():
+            donation=serializer.save()
+            #  retrive donation serializer
+            serializer=DonationsSerializer(donation)
+            return Response(serializer.data,status=status.HTTP_201_CREATED)
+        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+    
+    
+class RateList(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def post(self,request):
+        # set user in request data from token 
+        # request.data['user']=request.user.id
+        data = request.data.copy()
+        data['user'] = request.user.id
+        # create rate serializer
+        serializer = RateSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data,status=status.HTTP_201_CREATED)
+        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+
+class RateDetails(APIView):  
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def put(self,request,id):
+        try:
+            rate=get_object_or_404(Rate,id=id)
+            
+            if request.user.id != rate.user.id:
+                return Response({'message':"you didn't create this rate"},status=status.HTTP_400_BAD_REQUEST)
+            data = request.data.copy()
+            data['user'] = request.user.id
+            serializer=RateSerializer(rate,data=data)
+            
+            if serializer.is_valid():
+                serializer.update(rate,serializer.validated_data)
+                return Response(serializer.data,status=status.HTTP_200_OK)
+            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+        
+        except Http404:
+            return Response({'message':'rate not found'},status=status.HTTP_404_NOT_FOUND)
+        

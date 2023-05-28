@@ -11,4 +11,8 @@ urlpatterns = [
     path("tags", TagList.as_view()),
     path("projects", ProjectList.as_view()),
     path("projects/<int:id>", ProjectDetail.as_view()),
+    path("comments", CommentList.as_view()),
+    path("donations", DonationtList.as_view()),
+    path("rates", RateList.as_view()),
+    path("rates/<int:id>", RateDetails.as_view()),
 ]
