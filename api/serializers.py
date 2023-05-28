@@ -65,9 +65,14 @@ class CreateCommentSerializer(serializers.ModelSerializer):
 
         return instance
     
-                
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('id',"username", "first_name","last_name", "email",'picture',)
+       
+             
 class HomeSerializer(serializers.ModelSerializer):
-    user = serializers.StringRelatedField()
+    user = UserSerializer()
     category = serializers.StringRelatedField()
     donations = DonationsSerializer(many=True)
     tags = serializers.StringRelatedField(many=True)
