@@ -17,4 +17,7 @@ urlpatterns = [
     path("rates", RateList.as_view()),
     path("rates/<int:id>", RateDetails.as_view()),
     path("reports", ReportList.as_view()),
+    path("profile", Profile.as_view()),
+    path("profile/<int:id>/projects", UserProjects.as_view()),
+    path("profile/<int:id>/donations", UserDonations.as_view()),
 ]

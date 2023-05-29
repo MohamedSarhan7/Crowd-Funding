@@ -69,8 +69,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('id',"username", "first_name","last_name", "email",'picture',)
-       
-             
+
 class HomeSerializer(serializers.ModelSerializer):
     user = UserSerializer()
     category = serializers.StringRelatedField()
@@ -147,3 +146,24 @@ class ProjectSerializer(serializers.ModelSerializer):
             Image.objects.create(project=instance,url=img)
 
         return instance
+
+
+class ProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=User
+        exclude=[
+            'password',
+            'is_active',
+            'is_superuser',
+            'last_login',
+            'is_staff',
+            'email_verification_code',
+            'groups',
+            'user_permissions'
+]
+        extra_kwargs = {
+            'id': {'read_only': True},
+            'email': {'read_only': True},
+            'username': {'read_only': True},
+            'date_joined': {'read_only': True},
+        }

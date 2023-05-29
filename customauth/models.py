@@ -19,6 +19,10 @@ class User(AbstractUser):
     picture=models.ImageField(upload_to="picture/",blank=True,default="./default/user.png")
     email_verification_code=models.CharField(max_length=50,blank=True)
     
+    # extra optional info
+    birth_date=models.DateField(blank=True,null=True)
+    facebook_profile=models.URLField(blank=True,null=True)
+    counrty=models.CharField(max_length=50,blank=True,null=True)
     def genrate_verification_code(self):
         code = ''.join(random.choices(string.ascii_letters + string.digits, k=16))
         self.email_verification_code=code

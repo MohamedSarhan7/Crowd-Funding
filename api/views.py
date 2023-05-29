@@ -123,7 +123,7 @@ class ProjectList(APIView):
 
     def get(self, request):
         projects = Project.objects.filter(is_available=True)
-        print(list(projects))
+        # print(list(projects))
         paginator = self.pagination_class()
         result_page = paginator.paginate_queryset(queryset=projects, request=request)
         serializer = HomeSerializer(result_page, many=True)
@@ -289,3 +289,60 @@ class ReportList(APIView):
             return Response(serializer.data,status=status.HTTP_201_CREATED)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
+
+class Profile(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    def get(self,request):
+        print(self.request.path) 
+        serializer=ProfileSerializer(request.user)
+        return Response(serializer.data,status=status.HTTP_201_CREATED)
+
+    def put(self,request):
+        # user=User.objects.get(id=request.user.id)
+        serializer=ProfileSerializer(request.user,self.request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data,status=status.HTTP_200_OK)
+        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+    # delete user 
+    def delete(self,request):
+        user=User.objects.get(id=request.user.id)
+        data = request.data.copy()
+        # email=data.get('email',None) 
+        password=data.get('password',None)
+        if user.check_password(password):
+            user.delete()
+            return Response({'message':"Your account has been deleted"},status=status.HTTP_200_OK)
+        return Response({'message':"Incorrect password"},status=status.HTTP_400_BAD_REQUEST)
+        
+
+class UserProjects(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    pagination_class = PageNumberPagination
+
+    def get(self, request,id):
+        print(id)
+        user=User.objects.get(id=request.user.id)
+        
+        # projects = user.projects.all()
+        paginator = self.pagination_class()
+        result_page = paginator.paginate_queryset(queryset=user.projects.all(), request=request)
+        serializer = HomeSerializer(result_page, many=True)
+        return paginator.get_paginated_response(serializer.data)
+    
+class UserDonations(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    pagination_class = PageNumberPagination
+
+    def get(self, request,id):
+        print(id)
+        user=User.objects.get(id=request.user.id)
+        
+        # projects = user.projects.all()
+        paginator = self.pagination_class()
+        result_page = paginator.paginate_queryset(queryset=user.donations.all(), request=request)
+        serializer = DonationsSerializer(result_page, many=True)
+        return paginator.get_paginated_response(serializer.data)

@@ -25,7 +25,7 @@ def default_end_date():
     return (date.today() + timedelta(days=5)).isoformat()
 
 class Project(models.Model):
-    user=models.ForeignKey(User,on_delete=models.CASCADE)
+    user=models.ForeignKey(User,on_delete=models.CASCADE,related_name='projects')
     title=models.CharField(max_length=50)
     category=models.ForeignKey(Category,on_delete=models.CASCADE)
     details=models.TextField()
