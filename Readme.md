@@ -7,7 +7,10 @@ Crowdfunding is a form of crowdsourcing and alternative finance.
 ## Run Locally
 
 <hr>
+Postman
 
+Check out [API Postman Collection](https://api.postman.com/collections/19873401-6a3e335f-0f08-4235-a582-38463d019daf?access_key=PMAT-01H1JGTXHZN40X4PX4FW9F1ADM){:target="_blank"}.
+<hr>
 Clone the project
 
 ```bash
