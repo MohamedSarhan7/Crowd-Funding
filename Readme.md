@@ -9,7 +9,7 @@ Crowdfunding is a form of crowdsourcing and alternative finance.
 <hr>
 Postman
 <br>
-<a href="https://api.postman.com/collections/19873401-6a3e335f-0f08-4235-a582-38463d019daf?access_key=PMAT-01H1JGTXHZN40X4PX4FW9F1ADM" target="_blank">API Postman Collection</a>
+<a href="https://documenter.getpostman.com/view/19873401/2s93m8xf94" target="_blank">API Postman Collection</a>
 <hr>
 Clone the project
 
