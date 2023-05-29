@@ -15,7 +15,9 @@ from django.db.models import Q
 from .models import *
 from .serializers import *
 
-
+from django.shortcuts import render
+def home(request):
+    return render(request,'api/home.html') 
 
 class Home(APIView):    
     """

@@ -18,8 +18,13 @@ from django.contrib import admin
 from django.urls import path,include
 from django.conf.urls.static import static
 from django.conf import settings
+from django.shortcuts import render ,redirect
 
+def home(request):
+    return redirect('api/dummy') 
+# render(request=request,template_name='home.html')
 urlpatterns = [
+    path('', home),
     path('admin/', admin.site.urls),
     path('api/', include("api.urls")),
     path('auth/', include("customauth.urls")),
