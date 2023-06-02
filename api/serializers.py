@@ -1,5 +1,7 @@
 from rest_framework import serializers
 from .models import *
+import magic
+from django.core.exceptions import ValidationError
 
 class ImageSerializer(serializers.ModelSerializer):
     created_at = serializers.DateTimeField(read_only=True,format="%d-%m-%Y %H:%M:%S")
@@ -143,6 +145,9 @@ class ProjectSerializer(serializers.ModelSerializer):
         instance.tags.set(tags)
         
         for img in images:
+            mime = magic.from_buffer(img.read(1024), mime=True)
+            if not mime.startswith('image'):
+                raise ValidationError({"errors":f"{img.name}File is not an image"})
             Image.objects.create(project=instance,url=img)
 
         return instance
