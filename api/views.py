@@ -75,7 +75,7 @@ class Search(APIView):
         if not value:
             return Response({"error":"pleasr provide a title or tag for search value"},status=status.HTTP_400_BAD_REQUEST)    
                 
-        search=Project.objects.filter(Q(tags__name__icontains=value)|Q(title__icontains=value)).distinct().order_by('-average_rating')
+        search=Project.objects.filter(Q(tags__name__icontains=value)|Q(title__icontains=value),is_available=True).distinct().order_by('-average_rating')
         serializer_search=HomeSerializer(search,many=True)
             
         return Response(
