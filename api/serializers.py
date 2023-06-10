@@ -79,6 +79,7 @@ class HomeSerializer(serializers.ModelSerializer):
     tags = serializers.StringRelatedField(many=True)
     images = ImageSerializer(many=True)
     comments=CommentSerializer(many=True)
+    ratings=RateSerializer(many=True)
     created_at = serializers.DateTimeField(read_only=True,format="%d-%m-%Y %H:%M:%S")
     updated_at = serializers.DateTimeField(read_only=True,format="%d-%m-%Y %H:%M:%S")
     
@@ -92,7 +93,7 @@ class HomeSerializer(serializers.ModelSerializer):
             'is_featured','is_available',
             'tags','images','donations','comments'
             ,'created_at','updated_at',
-            # ''
+            'ratings'
             )
 
 class ReportSerializer(serializers.ModelSerializer):
